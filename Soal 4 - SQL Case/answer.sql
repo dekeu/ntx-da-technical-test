@@ -14,7 +14,7 @@ ORDER BY order_month; --Order it by the order months.
 --Business Insights:
 --June had the highest revenue in 2013 (5.081.069,13) with 719 orders.
 --November had the most orders (2.103), but revenue was lower than June (3.312.130,25).
---The lower revenue in November was caused by the lower average order value (1.574,95 in November versus 7.066,86 in June)
+--November's lower average order value (1.574,95 in November versus 7.066,86 in June) explains the revenue difference.
 
 -- Test Case 2
 
@@ -32,7 +32,7 @@ WITH subcategory_sales AS ( --Create a CTE
 )
 
 SELECT category, subcategory, products_sold, units_sold, ROUND(total_revenue, 2) AS total_revenue,
-    ROUND(100 * total_revenue / SUM(total_revenue) OVER (PARTITION BY category), 2) as pct_of_category_revenue --Calculating contribution percentage for each category's total revenue.
+    ROUND(100 * total_revenue / NULLIF(SUM(total_revenue) OVER (PARTITION BY category),0), 2) as pct_of_category_revenue --Calculating contribution percentage for each category's total revenue. If the category total is 0, return NULL to avoid division by zero.
 FROM subcategory_sales --Use the CTE
 ORDER BY category, total_revenue DESC; --Sort subcategories by revenue within each category
 
@@ -124,6 +124,7 @@ GROUP BY cohort_year, customer_type --Produce one row for each cohort and custom
 ORDER BY cohort_year, customer_type; --Show cohorts in year order.
 
 -- Business Insights:
--- Stores were 635 of 19,119 purchasing customers (3.3%) but generated approximately 73% of observed lifetime revenue.
--- In the 2013 cohort, Stores had a 93.27% repeat rate versus 33.92% for Individuals; their average lifetime revenue was 71,681.81 versus 981.22.
--- The 2014 cohort has had less time to place repeat orders, and it contains only four Stores. Its 0% Store repeat rate should not be treated as a retention trend.
+-- Stores are only 635 of 19,119 purchasing customers (3.32%) but generate 73.27% of observed revenue. This makes Store relationships important to protect.
+-- Store cohorts from 2011 to 2013 have high repeat rates (93.27%–98.05%).
+-- In the 2013 cohort, Stores averaged 71,681.81 in observed revenue per customer, versus 981.22 for Individuals.
+-- The 2014 Store cohort has only four customers, so its 0% repeat rate is not evidence that Store retention has declined.
